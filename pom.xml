@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>worflow-service</module>
     </modules>
 
     <properties>
