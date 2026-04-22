@@ -84,6 +84,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    @Transactional
     public void startWorkflow(String workflowId) {
 
 
