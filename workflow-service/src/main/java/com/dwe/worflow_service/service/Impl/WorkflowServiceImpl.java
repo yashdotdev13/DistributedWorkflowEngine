@@ -3,6 +3,7 @@ package com.dwe.worflow_service.service.Impl;
 import com.dwe.worflow_service.entity.Workflow;
 import com.dwe.worflow_service.enums.WorkflowStatus;
 import com.dwe.worflow_service.exceptions.DuplicateWorkflowException;
+import com.dwe.worflow_service.exceptions.WorkflowNotFoundException;
 import com.dwe.worflow_service.repository.WorkflowRepository;
 import com.dwe.worflow_service.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
@@ -45,12 +46,23 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public Workflow getWorkflowById(String workflowId) {
-        return null;
+
+        log.info("Fetching workflow with id: {}",workflowId);
+        return workflowRepository.findById(workflowId)
+                .orElseThrow(()->{
+                    log.error("workflow not found with id: {}",workflowId);
+                    return new WorkflowNotFoundException(workflowId);
+                });
     }
 
     @Override
     public List<Workflow> getWorkflows() {
-        return List.of();
+
+        log.info("Fetching all workflows");
+
+        List<Workflow> workflows = workflowRepository.findAll();
+        log.info("Total workflows found: {}",workflows.size());
+        return workflows;
     }
 
     @Override
