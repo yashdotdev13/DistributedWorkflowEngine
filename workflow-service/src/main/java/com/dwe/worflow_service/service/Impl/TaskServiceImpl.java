@@ -63,19 +63,100 @@ public class TaskServiceImpl implements TaskService {
     }
 
 
+    // get All tasks of a workflow
 
     @Override
     public List<Task> getTaskByWorkflow(String workflowId) {
-        return List.of();
+
+
+        log.info("Fetching tasks for workflow: {}",workflowId);
+
+        // validate workflow exists
+        if(!workflowRepository.existsById(workflowId)){
+            log.error("Workflow not found with while,fetching tasks: {}",workflowId);
+            throw new WorkflowNotFoundException(workflowId);
+        }
+
+        List<Task> tasks = taskRepository.findByWorkflowId(workflowId);
+        log.info("Total tasks found for workflow {}: {}",workflowId, tasks.size());
+
+        return tasks;
+
     }
 
+    // update task status
+
     @Override
+    @Transactional
     public Task updateTaskStatus(String taskId, String status) {
-        return null;
+
+        log.info("Updating status for task {} to {}", taskId, status);
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(()->{
+                    log.error("Task not found with id: {}",taskId);
+                    return new TaskNotFoundException(taskId);
+                });
+
+        TaskStatus newStatus;
+
+        try{
+            newStatus = TaskStatus.valueOf(status.toUpperCase());
+        }catch(IllegalArgumentException e){
+            log.error("Invalid task status providee: {}",status);
+            throw new IllegalArgumentException("Invalid task status: "+status);
+        }
+
+       // enforce valid state transitions
+        validateStateTransition(task.getStatus(), newStatus);
+
+        task.setStatus(newStatus);
+        task.setUpdatedAt(LocalDateTime.now());
+
+        Task updatedTask = taskRepository.save(task);
+        log.info("Task {} status updated to {}", taskId, newStatus);
+
+        return updatedTask;
     }
 
     @Override
+    @Transactional
     public void incrementRetryCount(String taskId) {
 
+        log.info("Incrementing retry count for task: {}", taskId);
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> {
+                    log.error("Task not found while incrementing retry: {}", taskId);
+                    return new TaskNotFoundException(taskId);
+                });
+
+        int currentRetry = task.getRetryCount() == null ? 0 : task.getRetryCount();
+        int maxRetries = task.getMaxRetries() == null ? 0 : task.getMaxRetries();
+
+        if (currentRetry >= maxRetries) {
+            log.warn("Max retries reached for task: {}", taskId);
+            return;
+        }
+
+        task.setRetryCount(currentRetry + 1);
+        task.setUpdatedAt(LocalDateTime.now());
+
+        taskRepository.save(task);
+        log.info("Retry count updated for task {}: {}", taskId, task.getRetryCount());
+    }
+
+    /**
+     * Validate state transitions (IMPORTANT )
+     */
+    private void validateStateTransition(TaskStatus current, TaskStatus next) {
+
+        if (current == TaskStatus.SUCCESS) {
+            throw new IllegalStateException("Cannot change state from SUCCESS");
+        }
+
+        if (current == TaskStatus.RUNNING && next == TaskStatus.PENDING) {
+            throw new IllegalStateException("Invalid transition RUNNING -> PENDING");
+        }
     }
 }

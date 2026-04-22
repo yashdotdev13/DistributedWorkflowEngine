@@ -22,4 +22,7 @@ public interface TaskRepository extends JpaRepository<Task, String> {
 
     // Tasks for retry
     List<Task> findByStatusAndRetryCountLessThan(TaskStatus status, Integer maxRetries);
+
+    List<Task> findByWorkflowId(String workflowId);
+
 }
