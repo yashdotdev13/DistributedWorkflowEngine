@@ -48,7 +48,7 @@ public class TaskDependencyServiceImpl implements TaskDependencyService {
                     return new TaskNotFoundException(childTaskId);
                 });
 
-        // 🔥 Check if adding this creates a cycle
+        // Check if adding this creates a cycle
         if (createsCycle(parentTaskId, childTaskId)) {
             log.error("Cycle detected while adding dependency {} -> {}", parentTaskId, childTaskId);
             throw new InvalidDAGException("Adding this dependency will create a cycle");
@@ -68,13 +68,53 @@ public class TaskDependencyServiceImpl implements TaskDependencyService {
 
     @Override
     public List<TaskDependency> getDependenciesByTask(String taskId) {
-        return List.of();
+
+        log.info("Fetching dependencies for task: {}", taskId);
+
+        if (!taskRepository.existsById(taskId)) {
+            log.error("Task not found while fetching dependencies: {}", taskId);
+            throw new TaskNotFoundException(taskId);
+        }
+
+        return taskDependencyRepository.findByChildTaskId(taskId);
     }
 
     @Override
     public void validateDAG(String workflowId) {
 
+        log.info("Validating DAG for workflow: {}", workflowId);
+
+        List<Task> tasks = taskRepository.findByWorkflowId(workflowId);
+
+        Map<String, List<String>> graph = new HashMap<>();
+
+        for (Task task : tasks) {
+            graph.put(task.getId(), new ArrayList<>());
+        }
+
+        List<TaskDependency> dependencies = taskDependencyRepository.findAll();
+
+        for (TaskDependency dep : dependencies) {
+            String parentId = dep.getParentTask().getId();
+            String childId = dep.getChildTask().getId();
+
+            graph.get(parentId).add(childId);
+        }
+
+        //  Detect cycles using DFS
+        Set<String> visited = new HashSet<>();
+        Set<String> recursionStack = new HashSet<>();
+
+        for (String node : graph.keySet()) {
+            if (detectCycle(node, graph, visited, recursionStack)) {
+                log.error("Cycle detected in workflow: {}", workflowId);
+                throw new InvalidDAGException("Workflow contains a cycle");
+            }
+        }
+
+        log.info("DAG validation successful for workflow: {}", workflowId);
     }
+
 
 
     private boolean createsCycle(String parentId, String childId) {
