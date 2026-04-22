@@ -66,12 +66,43 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    @Transactional
     public void deleteWorkflow(String workflowId) {
+
+        log.info("Deleting workflow with id: {}",workflowId);
+
+        Workflow workflow = workflowRepository.findById(workflowId)
+                .orElseThrow(()->{
+                    log.error("Workflow not found for deletion: {}",workflowId);
+                    return new WorkflowNotFoundException(workflowId);
+                });
+
+        workflowRepository.delete(workflow);
+
+        log.info("Workflow deleted successfully with id: {}",workflowId);
 
     }
 
     @Override
     public void startWorkflow(String workflowId) {
+
+
+        log.info("Starting workflow with id: {}",workflowId);
+
+        Workflow workflow = workflowRepository.findById(workflowId)
+                .orElseThrow(()-> {
+                    log.error("Workflow not found for execution: {}",workflowId);
+                    return new WorkflowNotFoundException(workflowId);
+                });
+
+        workflow.setStatus(WorkflowStatus.RUNNING);
+        workflow.setUpdatedAt(LocalDateTime.now());
+
+        workflowRepository.save(workflow);
+
+        log.info("Workflow marked as RUNNING: {}",workflowId);
+
+        //TODO: Trigger scheduler event (kafka)
 
     }
 }
