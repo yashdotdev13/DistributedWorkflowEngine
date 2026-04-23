@@ -2,6 +2,7 @@ package com.dwe.worflow_service.entity;
 
 
 import com.dwe.worflow_service.enums.WorkflowStatus;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,7 @@ public class Workflow {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "workflow", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Task> tasks;
 
 

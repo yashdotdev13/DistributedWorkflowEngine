@@ -2,6 +2,7 @@ package com.dwe.worflow_service.entity;
 
 
 import com.dwe.worflow_service.enums.TaskStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,5 +42,6 @@ public class Task {
     // 🔗 Relation to workflow
     @ManyToOne
     @JoinColumn(name = "workflow_id", nullable = false)
+    @JsonBackReference
     private Workflow workflow;
 }
