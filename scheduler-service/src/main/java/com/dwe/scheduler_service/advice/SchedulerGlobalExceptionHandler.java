@@ -1,40 +1,46 @@
 package com.dwe.scheduler_service.advice;
 
 
+
 import com.dwe.scheduler_service.exception.SchedulerBaseException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestControllerAdvice
 public class SchedulerGlobalExceptionHandler {
 
     @ExceptionHandler(SchedulerBaseException.class)
-    public ResponseEntity<?> handleSchedulerException(
+    public ResponseEntity<ErrorResponse> handleSchedulerException(
             SchedulerBaseException ex,
             HttpServletRequest request) {
 
-        return ResponseEntity
-                .status(ex.getStatus())
-                .body(new ErrorResponse(
-                        ex.getMessage(),
-                        ex.getErrorCode(),
-                        ex.getStatus().value(),
-                        request.getRequestURI()
-                ));
+        ErrorResponse response = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .errorCode(ex.getErrorCode())
+                .status(ex.getStatus().value())
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGenericException(Exception ex,
-                                                    HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleGenericException(
+            Exception ex,
+            HttpServletRequest request) {
 
-        return ResponseEntity
+        ErrorResponse response = ErrorResponse.builder()
+                .message("Internal server error")
+                .errorCode("INTERNAL_SERVER_ERROR")
                 .status(500)
-                .body(new ErrorResponse(
-                        "Internal server error",
-                        "INTERNAL_SERVER_ERROR",
-                        500,
-                        request.getRequestURI()
-                ));
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(500).body(response);
     }
 }
