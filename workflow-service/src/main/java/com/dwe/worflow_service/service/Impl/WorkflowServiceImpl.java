@@ -1,9 +1,11 @@
 package com.dwe.worflow_service.service.Impl;
 
+import com.dwe.events.WorkflowStartedEvent;
 import com.dwe.worflow_service.entity.Workflow;
 import com.dwe.worflow_service.enums.WorkflowStatus;
 import com.dwe.worflow_service.exceptions.DuplicateWorkflowException;
 import com.dwe.worflow_service.exceptions.WorkflowNotFoundException;
+import com.dwe.worflow_service.kafka.WorkflowEventProducer;
 import com.dwe.worflow_service.repository.WorkflowRepository;
 import com.dwe.worflow_service.service.WorkflowService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.List;
 public class WorkflowServiceImpl implements WorkflowService {
 
     private final WorkflowRepository workflowRepository;
+    private final WorkflowEventProducer eventProducer;
 
     @Override
     @Transactional
@@ -103,7 +106,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         log.info("Workflow marked as RUNNING: {}",workflowId);
 
-        //TODO: Trigger scheduler event (kafka)
 
+        // Kafka publisher event
+        //  Create event using common-lib
+        WorkflowStartedEvent event = WorkflowStartedEvent.builder()
+                .workflowId(workflow.getId())
+                .workflowName(workflow.getName())
+                .build();
+
+        eventProducer.publishWorkflowStarted(event);
     }
 }
