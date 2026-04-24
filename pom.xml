@@ -43,6 +43,7 @@
     <!-- Modules -->
     <modules>
         <module>workflow-service</module>
+        <module>common-libs</module>
     </modules>
 
 
