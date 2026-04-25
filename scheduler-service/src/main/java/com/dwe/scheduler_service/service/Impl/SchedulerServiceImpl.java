@@ -2,8 +2,10 @@ package com.dwe.scheduler_service.service.Impl;
 
 
 
+import com.dwe.events.TaskReadyEvent;
 import com.dwe.scheduler_service.entities.Task;
 import com.dwe.scheduler_service.enums.TaskStatus;
+import com.dwe.scheduler_service.kafka.TaskEventProducer;
 import com.dwe.scheduler_service.repository.TaskRepository;
 import com.dwe.scheduler_service.service.SchedulerService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import java.util.List;
 public class SchedulerServiceImpl implements SchedulerService {
 
     private final TaskRepository taskRepository;
+    private final TaskEventProducer taskEventProducer;
 
     @Override
     @Transactional
@@ -42,6 +45,17 @@ public class SchedulerServiceImpl implements SchedulerService {
                 taskRepository.save(task);
 
                 log.info("Task marked as READY: taskId={}", task.getId());
+
+                TaskReadyEvent event = TaskReadyEvent.builder()
+                        .taskId(task.getId())
+                        .workflowId(task.getWorkflow().getId())
+                        .taskName(task.getName())
+                        .taskType(task.getType())
+                        .config(task.getConfig())
+                        .build();
+
+                taskEventProducer.publishTaskReady(event);
+
 
             } catch (Exception ex) {
                 log.error("Error updating task status for taskId={}", task.getId(), ex);
