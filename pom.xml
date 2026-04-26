@@ -45,6 +45,7 @@
         <module>workflow-service</module>
         <module>common-libs</module>
         <module>scheduler-service</module>
+        <module>worker-service</module>
     </modules>
 
 
