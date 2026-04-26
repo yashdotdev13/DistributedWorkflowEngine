@@ -10,6 +10,15 @@
         <module name="scheduler-service" />
         <module name="workflow-service" />
       </profile>
+      <profile name="Annotation profile for PayPal Backend Clone" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="worker-service" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="worflow-service" target="1.8" />
@@ -20,6 +29,7 @@
       <module name="common-libs" options="-parameters" />
       <module name="scheduler-service" options="-parameters" />
       <module name="worflow-service" options="-parameters" />
+      <module name="worker-service" options="-parameters" />
       <module name="workflow-service" options="-parameters" />
     </option>
   </component>
