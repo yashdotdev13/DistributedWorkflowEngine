@@ -4,6 +4,7 @@ package com.dwe.worker_service.kafka;
 
 
 import com.dwe.events.TaskReadyEvent;
+import com.dwe.worker_service.service.TaskExecutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
