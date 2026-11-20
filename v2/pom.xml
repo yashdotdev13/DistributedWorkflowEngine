@@ -75,6 +75,7 @@
 
     <modules>
         <module>dwe-common</module>
+        <module>dwe-persistence</module>
     </modules>
 
     <build>
