@@ -2,6 +2,7 @@ package com.dwe.persistence.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/** persistence properties configuration */
 @ConfigurationProperties(prefix = "dwe.persistence")
 public class DwePersistenceProperties {
 

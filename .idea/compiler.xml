@@ -7,9 +7,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="worker-service" />
+        <module name="dwe-common" />
         <module name="common-libs" />
         <module name="scheduler-service" />
         <module name="workflow-service" />
+        <module name="dwe-persistence" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -19,6 +21,8 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="common-libs" options="-parameters" />
+      <module name="dwe-common" options="-parameters" />
+      <module name="dwe-persistence" options="-parameters" />
       <module name="scheduler-service" options="-parameters" />
       <module name="worflow-service" options="-parameters" />
       <module name="worker-service" options="-parameters" />
